@@ -444,22 +444,10 @@ if 'msgs_tmp' in globals():
 			)
 	path_msgs_nor = os.path.normpath(msgs_path)
 	path_tmp_nor = os.path.normpath(msgs_tmp.name)
-	print(f'{append} {path_tmp_nor} >> {path_msgs_nor}')
+	print(f'{append} {path_tmp_nor} >> path_msgs_nor')
 	os.system(f'{append} {path_tmp_nor} >> {path_msgs_nor}')
-	'''
-	df_msgs = pd.read_csv(
-		msgs_tmp.name,
-		encoding='utf-8'
-	)
-	df_msgs.to_csv(
-		msgs_path,
-		mode='a', 
-		index=False,
-		encoding='utf-8'
-		)
-	'''
 	msgs_tmp.close()
-	#os.remove(msgs_tmp.name)
+	os.remove(msgs_tmp.name)
 '''
 Save downloaded context
 '''
