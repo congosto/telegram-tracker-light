@@ -1,4 +1,4 @@
-::: {align="center"}
+
 # **telegram-tracker-light**: `a Python-based open-source tool for Telegram`(fork de Telegram-tracker)
 
 ------------------------------------------------------------------------
