@@ -4,6 +4,7 @@
 import pandas as pd
 import asyncio
 import os
+import re
 import sys
 
 # import submodules
@@ -479,136 +480,27 @@ def get_reply_attrs(msg, res, username):
 
 	return res
 
-# Get URL domains < netloc >
-def get_netloc(value):
+def get_url_attrs(msg, res):
 	'''
+	get from msg
 	'''
-	N = urlparse(value).netloc
-	return N.replace('www.', '')
 
-# Get URL attrs
-def get_url_attrs(media, res):
-	'''
-	Type WebPage
-
-	Source: https://core.telegram.org/constructor/messageMediaWebPage
-	Telethon: https://tl.telethon.dev/constructors/web_page.html
-	
-	'''
 	has_url = 0
 	url = None
 	domain = None
-	url_title = None
-	url_description = None
-	if res['media_type'] == 'MessageMediaWebPage':
-		_type = media['webpage']['_']
-		if _type == 'WebPage':
-			url = media['webpage']['url']
-			if url:
-				has_url = 1
-
-				# get domain
-				domain = get_netloc(url)
-
-				# title
-				url_title = media['webpage']['title']
-				if url_title != None:
-					url_title = clean_msg(url_title)
-				if url_description != None:
-					url_description = clean_msg(url_description)
-
+	url = re.search(r'https?://\S+', msg)
+	if url != None:
+		url = url.group()
+		domain = re.search(r'(?<=://)[^/]+', url)
+		domain = re.sub ('^www\.|^WWW\.', "", domain.group())
+		domain = re.sub ('m.youtu.be|youtu.be|m.youtube.com', "youtube.com", domain)
+		domain = re.sub ('t.co', "twitter.com", domain)
+		has_url = 1
 	res['has_url'] = has_url
 	res['url'] = url
 	res['domain'] = domain
-	res['url_title'] = url_title
-	res['url_description'] = url_description
-
 	return res
 
-# Get document attrs
-def get_document_attrs(media, res):
-	'''
-	Type Document
-	
-	Source: https://core.telegram.org/constructor/messageMediaDocument
-	Telethon: https://tl.telethon.dev/constructors/document.html
-	
-	'''
-	if res['media_type'] == 'MessageMediaDocument':
-		res['document_id'] = media['document']['id']
-		res['document_type'] = media['document']['mime_type']
-
-		# get duration
-		attrs = media['document']['attributes']
-		for i in attrs:
-			if i['_'] == 'DocumentAttributeVideo':
-				res['document_video_duration'] = i['duration']
-			
-			if i['_'] == 'DocumentAttributeFilename':
-				res['document_filename'] = i['file_name']
-
-	return res
-
-# Get poll attrs
-def get_poll_attrs(media, res):
-	'''
-
-	Type Poll
-	
-	Source: https://core.telegram.org/constructor/messageMediaPoll
-	Telethon: https://tl.telethon.dev/constructors/poll.html
-	
-	'''
-	if res['media_type'] == 'MessageMediaPoll':
-		res['poll_id'] = media['poll']['id']
-		res['poll_question'] = media['poll']['question']
-		res['poll_total_voters'] = media['results']['total_voters']
-		res['poll_results'] = media['results']['results']
-
-	return res
-
-# Get contact attrs
-def get_contact_attrs(media, res):
-	'''
-	Type Contact
-
-	Source: https://core.telegram.org/constructor/messageMediaContact
-	Telethon: https://tl.telethon.dev/constructors/message_media_contact.html
-
-	'''
-	if res['media_type'] == 'MessageMediaContact':
-		res['contact_phone_number'] = media['phone_number']
-		res['contact_name'] = media['first_name'] + ' ' + media['last_name']
-		res['contact_userid'] = media['user_id']
-
-	return res
-
-# Get geo attrs
-def get_geo_attrs(media, res):
-	'''
-
-	Type GeoPoint
-
-	Source: https://core.telegram.org/constructor/messageMediaGeo
-	Telethon:
-	>	https://tl.telethon.dev/constructors/geo_point.html
-	>	https://tl.telethon.dev/constructors/message_media_venue.html
-
-	'''
-	if media != None:
-		if 'geo' in media.keys():
-			res['geo_type'] = media['_']
-			res['lat'] = media['geo']['lat']
-			res['lng'] = media['geo']['long']
-		
-		if 'venue_id' in media.keys():
-			res['venue_id'] = media['venue_id']
-			res['venue_type'] = media['venue_type']
-			res['venue_title'] = media['title']
-			res['venue_address'] = media['address']
-			res['venue_provider'] = media['provider']
-
-	return res
 
 # Chats dataset -> columns
 def chats_dataset_columns():
@@ -676,8 +568,6 @@ def msgs_dataset_columns():
 		'is_reply',
 		'reply_to_msg_id',
 		'reply_msg_link',
-		'contains_media',
-		'media_type',
 		'has_url',
 		'url',
 		'domain',
@@ -777,19 +667,14 @@ def write_collected_msgs (messages, username, chats, msg_tmp):
 					username
 					)
 				# Media
-				response['contains_media'] = 1 if item['media'] != None else 0
-				if 'media' in item.keys():
-					response['media_type'] = None if item['media'] == None \
-						else item['media']['_']
-
+				
 				# URLs -> Constructor MessageMediaWebPage
 				'''
-				Type WebPage
+				Extract fron message
 
-				Source: https://core.telegram.org/constructor/messageMediaWebPage
-				Telethon: https://tl.telethon.dev/constructors/web_page.html
 				'''
-				response = get_url_attrs(item['media'], response)
+				response = get_url_attrs(msg, response)
+
 				df_msgs.loc[-1] = response
 		else:
 		#except:
