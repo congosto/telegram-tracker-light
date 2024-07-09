@@ -123,7 +123,7 @@ try:
 				group_file_nor = os.path.normpath(group_file)
 				print (f' {copy} {group_file_nor} {file_list_channels_nor}')
 				os.system (f' {copy} {group_file_nor} {file_list_channels_nor}')
-			(f_log, list_downloaded) = log_management(f'{path_group}/context/{group}_log.csv')
+			(f_log, list_downloaded) = log_management(path_group,'{group}_log.csv')
 			with open(file_list_channels_nor, 'r') as inputfile:
 				channels = inputfile.readlines()
 			num_channels = len (channels)
