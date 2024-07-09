@@ -76,7 +76,7 @@ The **telegram-tracker.ipynb** notebook will mount drive so that the scripts can
 
 ### Local enviroment
 
-This tool connects to Telegram's API. It generates JSON files containing channel's data, including channel's information and posts. You can search for a specific channel, or a set of channels provided in a text file (one channel per line.)
+This tool connects to Telegram's API. It generates csv files containing channel's data, including channel's information and posts. You can search for a specific channel, or a set of channels provided in a text file (one channel per line.)
 
 You can access it in command mode, but with the **menu.py** script you can download in a controlled way
 
@@ -219,10 +219,6 @@ for chanel in channels:
     -   user_exceptions.txt
     -   counter.csv
     -   collected_chanels
--   New folders - based on the number of requested channels: <channel_name> containing
-    -   A JSON file containing channel's profile metadata
-    -   A JSON file containing posts from the requested channel
-    -   log_downloads.csv
 
 These examples will retrieve all posts available through the API from the requested channel. If you want to collect channel's information only, without posts, you can run:
 
