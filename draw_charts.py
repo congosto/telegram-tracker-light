@@ -13,6 +13,7 @@ from adjustText import adjust_text
 import matplotlib.ticker as ticker
 from si_prefix import si_format
 from wordcloud import WordCloud
+from collections import Counter
 from datetime import datetime
 from nltk.corpus import stopwords
 # Get start time
@@ -105,9 +106,8 @@ def create_timeline_lineplot(ddf, attribute_a, attribute_b, filter_b, title, tit
   plt.tight_layout()
   plt.savefig(output_path)
   plt.close()
-  print(f"Successfully saved in {output_path}.")
+  print(f'Successfully saved in {output_path}.')
   print(f'Last {datetime.now()- start_time_chart} ')
-
 
 '''
 
@@ -137,49 +137,8 @@ def create_top_domains_barplot(ddf, title, output_path):
   plt.tight_layout()
   plt.savefig(output_path)
   plt.close()
-  print(f"Successfully saved in {output_path}.")
+  print(f'Successfully saved in {output_path}.')
   print(f'Last {datetime.now()- start_time_chart} ')
-
-  '''
-
-	line chart urls
-
-	'''
-def create_urls_timeline(ddf, title, output_path):
-  start_time_chart = datetime.now()
-  print("----> line chart urls...")
-  print("----> Create line chart with cumulative urls by date...")
-  # Count the occurrences of each domain
-
-  # Filter the DataFrame to include only the top 10 domains
-  ddf_urls = ddf[ddf['has_url'] == "1"].compute()
-
-  # Create a column for the date without the time
-  ddf_urls['date'] = ddf_urls['date'].dt.date
-  # Group by date and domain and count occurrences
-  df_grouped = ddf_urls.groupby(['date', 'has_url']).size().reset_index(name='count')
-
-  # Create cumulative count column
-  df_grouped['cumulative_count'] = df_grouped.groupby('has_url')['count'].cumsum()
-  df_grouped= df_grouped.sort_values(by=['cumulative_count','has_url'], ascending=[False, False])
-  # Create the line chart
-  plt.figure(figsize=(14, 8))
-  ax = sns.lineplot(data=df_grouped, x='date', y='count', linewidth=1.5)
-  ax.yaxis.set_major_formatter(ticker.FuncFormatter(si_formatter))
-  plt.title(title, fontsize=16)
-
-  plt.xlabel('', fontsize=14)
-  plt.ylabel('Cumulative total of URLs', fontsize=14)
-  plt.xticks(rotation=0)
-  plt.legend('',frameon=False)
-
-  plt.tight_layout()
-  plt.savefig(output_path)
-  plt.close()
-  print(f"Successfully saved in {output_path}.")
-  print(f'Last {datetime.now()- start_time_chart} ')
-
-
 
 '''
 
@@ -192,7 +151,7 @@ def create_top_domains_timeline(ddf, title, output_path):
   # Count the occurrences of each domain
   domain_counts = ddf['domain'].value_counts().compute().reset_index()
   domain_counts.columns = ['domain', 'count']
-  # Select top 10
+  # Select top 15
   top_10_domains = domain_counts.nlargest(10, 'count')['domain']
 
   # Filter the DataFrame to include only the top 10 domains
@@ -209,8 +168,7 @@ def create_top_domains_timeline(ddf, title, output_path):
   color_lines = sns.color_palette("tab10")
   # Create the line chart
   plt.figure(figsize=(14, 8))
-  ax = sns.lineplot(data=df_grouped, x='date', y='cumulative_count', hue='domain', palette='tab10', linewidth=1.5)
-  ax.yaxis.set_major_formatter(ticker.FuncFormatter(si_formatter))
+  sns.lineplot(data=df_grouped, x='date', y='cumulative_count', hue='domain', palette='tab10', linewidth=1.5)
 # Annotate top values
   i_color = 0
   texts = []
@@ -233,7 +191,7 @@ def create_top_domains_timeline(ddf, title, output_path):
   plt.tight_layout()
   plt.savefig(output_path)
   plt.close()
-  print(f"Successfully saved in {output_path}.")
+  print('Successfully saved in {output_path}.')
   print(f'Last {datetime.now()- start_time_chart} ')
 
 '''
@@ -254,36 +212,32 @@ Create a word cloud
 
 # Create a word cloud of the messages using a random sample of 10%
 def create_wordcloud(ddf, column, output_path):
-    print(f"Generating word cloud of {column}...")
-
-    # Get a random sample of 10% of the messages
-    sample_ddf = ddf[column].dropna().sample(frac=0.1, random_state=1).compute().astype(str)
-    # Merge all messages into one text
-    text = ' '.join(sample_ddf.tolist())
-    text = text.keys()[:1000]
-    size =len(text)
-    print(size)
-    return
-
+  start_time_chart = datetime.now()
+  print(f"---->Generating word cloud of {column}...")
+  #Get a random sample of 10% of the messages
+  sample_ddf = ddf[column].dropna().sample(frac=0.1, random_state=1).compute().astype(str)
+  counts_all = Counter()
+  stop_words = set(stopwords.words('spanish') + stopwords.words('english'))
+  for line in sample_ddf:
+    counts_line = WordCloud(stopwords=stop_words).process_text(line)
+    counts_all.update(counts_line)
     # Generate word cloud
-    stop_words = set(stopwords.words('spanish') + stopwords.words('english'))
-    wordcloud = WordCloud(width=1200, height=800, background_color='white', stopwords=stop_words).generate(text)
+  wordcloud = WordCloud(width=1200, height=800, background_color='white', stopwords=stop_words).generate_from_frequencies(counts_all)
 
-    # Get the 5 most used words
-    top_5_words = list(wordcloud.words_.keys())[:5]
+  # Get the 5 most used words
+  top_5_words = list(wordcloud.words_.keys())[:5]
 
-    # Mostrar y guardar nube de palabras
-    plt.figure(figsize=(15, 10))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.tight_layout()
-    plt.savefig(output_path)
-    plt.close()
-    print(f"Successfully saved in {output_path}.")
+  # Mostrar y guardar nube de palabras
+  plt.figure(figsize=(15, 10))
+  plt.imshow(wordcloud, interpolation='bilinear')
+  plt.axis('off')
+  plt.tight_layout()
+  plt.savefig(output_path)
+  plt.close()
+  print(f'Successfully saved in {output_path}.')
+  print(f'Last {datetime.now()- start_time_chart}')
 
-    return top_5_words
-
-
+  return top_5_words
 
 '''
 
@@ -317,10 +271,14 @@ args = vars(parser.parse_args())
 dataset = args['dataset']
 # Variable for file processing path
 base_path = f'./data/{dataset}/'
-base_images_path = f'./data/{dataset}/images/'
+if not os.path.exists(base_path):
+  print(f'{dataset} does not exist')
+  sys.exit()
+base_images_path = f'./data/{dataset}/'
 if not os.path.exists(base_images_path):
 	os.makedirs(f'{base_images_path}', exist_ok=True)
 csv_file_path = f'{base_path}msgs_dataset.csv'
+
 
 # Change matplotlib backend to 'Agg'
 plt.close('all')
@@ -350,6 +308,8 @@ dtypes = {
     'is_reply': 'int32',
     'reply_to_msg_id': 'object',
     'reply_msg_link': 'object',
+    'contains_media': 'object',
+    'media_type': 'object',
     'has_url': 'object',
     'url': 'object',
     'domain': 'object',
@@ -359,12 +319,10 @@ dtypes = {
 read and clean data
 
 '''
-if not os.path.exists(csv_file_path):
-  print(f'{csv_file_path} dataset not exist')
-  sys.exit()
 # Read CSV file using dask with specified data types
 print("----> Reading CSV file...")
 ddf = dd.read_csv(csv_file_path, dtype=dtypes, on_bad_lines='skip', engine='python')
+#ddf = dd.read_csv(csv_file_path, on_bad_lines='skip', engine='python')
 print(f'Last {datetime.now()- start_time} ')
 # Convert 'date' column to datetime
 ddf['date'] = dd.to_datetime(ddf['date'], errors='coerce')
@@ -372,9 +330,6 @@ ddf['date'] = dd.to_datetime(ddf['date'], errors='coerce')
 ddf = ddf.dropna(subset=['date'])
 
 
-create_urls_timeline(ddf,
-  f'{dataset}: Cumulative temporal distribution of URLs',
-  base_images_path + 'urls_timeline.png')
 
 '''
 
@@ -414,9 +369,11 @@ Creating domain graphs
 create_top_domains_barplot(ddf,
   f'{dataset}: Top 15 Dominios por Totales',
   base_images_path + 'top_15_domains.png'),
+
 create_top_domains_timeline(ddf,
   f'{dataset}: Cumulative temporal distribution of the 10 most mentioned domains',
   base_images_path + 'top_10_domains_timeline.png')
+
 '''
 
 Creating word cloud
@@ -425,7 +382,7 @@ Creating word cloud
 # Apply cleanup function to message column
 ddf['cleaned_message'] = ddf['message'].dropna().apply(clean_text, meta=('message', 'object'))
 # Create the word cloud for clean messages and get the 5 most used words
-#top_5_words = create_wordcloud(ddf, 'cleaned_message', base_images_path + 'wordcloud_messages.png')
+top_5_words = create_wordcloud(ddf, 'cleaned_message', base_images_path + 'wordcloud_messages.png')
 
 '''
 
