@@ -247,6 +247,7 @@ if entity_attrs:
 			)
 
 		data = posts.to_dict()
+
 		# Change by Congosto
 		'''
 		get most recent msg 
@@ -254,6 +255,7 @@ if entity_attrs:
 		pbar_flag = False
 		if len(posts.messages) > 0:
 			msgs_tmp = tempfile.NamedTemporaryFile(delete=False)
+			write_collected_msgs (data['messages'], channel, data['chats'],msgs_tmp.name)
 			offset_id = min([i['id'] for i in data['messages']])
 			last_msg = data['messages'][0]['id']
 			num_msgs = len(posts.messages)
