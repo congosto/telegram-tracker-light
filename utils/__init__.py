@@ -492,9 +492,10 @@ def get_url_attrs(msg, res):
 	if url != None:
 		url = url.group()
 		domain = re.search(r'(?<=://)[^/]+', url)
-		domain = re.sub ('^www\.|^WWW\.', "", domain.group())
-		domain = re.sub ('m.youtu.be|youtu.be|m.youtube.com', "youtube.com", domain)
-		domain = re.sub ('t.co', "twitter.com", domain)
+		if domain != None:
+			domain = re.sub ('^www\.|^WWW\.', "", domain.group())
+			domain = re.sub ('m.youtu.be|youtu.be|m.youtube.com', "youtube.com", domain)
+			domain = re.sub ('t.co', "twitter.com", domain)
 		has_url = 1
 	res['has_url'] = has_url
 	res['url'] = url
@@ -532,14 +533,67 @@ def chats_dataset_columns():
 		'banned_rights',
 		'default_banned_rights',
 		'participants_count',
-		'collected_actions',
-		'collected_posts',
-		'replies',
-		'other_actions',
-		'number_views',
-		'forwards',
-		'replies_received'
+		'usernames',
+		'stories_max_id',
+		'color,profile_color',
+		'emoji_status',
+		'level',
+		'username_y,',
+		'counter',
+		'from_messages',
+		'channel_request',
+		'channel_req_targeted_by',
+		'source'
 	]
+# Chats dataset ->types
+def chats_dataset_dtypes():
+	'''
+	'''
+	dtypes = {
+		'_': 'object',
+		'id': 'object',
+		'username': 'object',
+		'title': 'object',
+		'photo': 'object',
+		'date': 'object',
+		'creator': 'object',
+		'left': 'object',
+		'broadcast': 'object',
+		'verified': 'object',
+		'megagroup': 'object',
+		'restricted': 'object',
+		'signatures': 'object',
+		'min': 'object',
+		'scam': 'object',
+		'has_link': 'object',
+		'has_geo': 'object',
+		'slowmode_enabled': 'object',
+		'call_active': 'object',
+		'call_not_empty': 'object',
+		'fake': 'object',
+		'gigagroup': 'object',
+		'noforwards': 'object',
+		'join_to_send':'object',
+		'join_request':'object',
+		'forum':'object',
+		'stories_hidden':'object',
+		'stories_hidden_min':'object',
+		'stories_unavailable':'object',
+		'access_hash':'object',
+		'username':'object',
+		'restriction_reason': 'object',
+		'admin_rights': 'object',
+		'banned_rights': 'object',
+		'default_banned_rights': 'object',
+		'participants_count': 'object',
+		'usernames': 'object',
+		'stories_max_id': 'object',
+		'color': 'object',
+		'profile_color': 'object',
+		'emoji_status': 'object',
+		'level': 'object'
+	}
+	return (dtypes)
 
 # Msgs dataset -> columns
 def msgs_dataset_columns():
@@ -572,7 +626,39 @@ def msgs_dataset_columns():
 		'url',
 		'domain',
 	]
-
+# Msgs dataset -> columns
+def msgs_dataset_dtypes():
+# Specifying data types manually
+	dtypes = {
+		'signature': 'object',
+		'channel_id': 'object',
+		'channel_name': 'object',
+		'msg_id': 'object',
+		'message': 'object',
+		'date': 'object',
+		'msg_link': 'object',
+		'msg_from_peer': 'object',
+		'msg_from_id': 'object',
+		'views': 'float64',
+		'number_replies': 'float64',
+		'number_forwards': 'float64',
+		'is_forward': 'int32',
+		'forward_msg_from_peer_type': 'object',
+		'forward_msg_from_peer_id': 'object',
+		'forward_msg_from_peer_name': 'object',
+		'forward_msg_date': 'object',
+		'forward_msg_date_string': 'object',
+		'forward_msg_link': 'object',
+		'is_reply': 'int32',
+		'reply_to_msg_id': 'object',
+		'reply_msg_link': 'object',
+		'contains_media': 'object',
+		'media_type': 'object',
+		'has_url': 'object',
+		'url': 'object',
+		'domain': 'object',
+		}
+	return (dtypes)
 '''
 
 write collected msgs
