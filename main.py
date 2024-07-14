@@ -64,8 +64,9 @@ parser.add_argument(
 	'--output',
 	'-o',
 	type=str,
+	default='./data',
 	required=False,
-	help='Folder to save collected data. Default: `./output/data`'
+	help='Folder to save collected data. Default: `./data`'
 )
 
 
@@ -130,16 +131,9 @@ if args['max_msgs']:
 else:
 	limited_msgs = False
 	max_msgs = 0  # not limitedf
+output= args['output']
 
-# reading | Creating an output folder
-if args['output']:
-	output_folder = args['output']
-	if output_folder.endswith('/'):
-		output_folder = output_folder[:-1]
-	else:
-		pass
-else:
-	output_folder = './output/data'
+output_folder= f'{output}/{channel}'
 
 # create dirs
 create_dirs(output_folder)
@@ -380,7 +374,6 @@ f'{output_folder}/collected_chats.csv',
 encoding='utf-8'
 )
 
-#del counter_df['username'] # Change by Congosto
 #remove possible duplicates
 df.drop_duplicates(subset=['id'], keep='last', inplace=True) # Change by Congosto
 df.to_csv(
@@ -402,6 +395,7 @@ users_names.to_csv(
 	index=False,
 	encoding='utf-8'
 )
+del counter_df['username'] 
 df = df.merge(counter_df, how='left', on='id')
 '''
 The metadata and counters are saved in collected_chats_full.csv,
@@ -414,17 +408,7 @@ df.to_csv(
 	index=False,
 	encoding='utf-8'
 )
-'''
-The metadata and counters are saved in collected_chats_full.csv,
-to avoid problems when making 
- successive merges when extracting the channel data again
-'''
-df.to_csv(
-	f'{output_folder}/collected_chats_full.csv',
-	mode='w', 
-	index=False,
-	encoding='utf-8'
-)
+
 '''
 store msgs in csv
  '''
@@ -446,7 +430,7 @@ if 'msgs_tmp' in globals():
 			)
 	path_msgs_nor = os.path.normpath(msgs_path)
 	path_tmp_nor = os.path.normpath(msgs_tmp.name)
-	print(f'{append} {path_tmp_nor} >> path_msgs_nor')
+	print(f'{append} {path_tmp_nor} >> {path_msgs_nor}')
 	os.system(f'{append} {path_tmp_nor} >> {path_msgs_nor}')
 	msgs_tmp.close()
 	os.remove(msgs_tmp.name)
