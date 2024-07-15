@@ -117,7 +117,7 @@ else:
 					print(f'--------> already downloaded {channel} ({i} of {num_channels})')
 			else:
 				print(f'--> downloading {channel} ({i} of {num_channels}) ')
-				os.system(f'python main.py --telegram-channel {channel} --output {data_path}/{channel}')
+				os.system(f'python main.py --telegram-channel {channel}')
 				# Read msgs CSV file 
 				print(f'----> Reading CSV file...{data_path}/{channel}/collected_chats.csv')
 				df = pd.read_csv(f'{data_path}/{channel}/collected_chats.csv')
