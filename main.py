@@ -180,6 +180,8 @@ print ('')
 entity_attrs = loop.run_until_complete(
 	get_entity_attrs(client, channel)
 )
+
+
 '''
 
 collected chats
@@ -198,10 +200,9 @@ if entity_attrs:
 		full_channel_req(client, channel_id)
 	)
 
+	
 	# save full channel request
 	full_channel_data = channel_request.to_dict()
-
-
 	# collect chats
 	chats_path = f'{output_folder}/chats.txt'
 	chats_file = open(chats_path, mode='a', encoding='utf-8')
@@ -318,15 +319,16 @@ if entity_attrs:
 		# Close pbar connection
 		if pbar_flag:
 			pbar.close()
-
+else:
 	'''
-
-	Channels not found
+	Channel not found
 	'''
+	print(f'{channel} does not exist')
 	exceptions_path = f'{output_folder}/_exceptions-channels-not-found.txt'
 	w = open(exceptions_path, encoding='utf-8', mode='a')
 	w.write(f'{channel}\n')
 	w.close()
+	sys.exit()
 
 '''
 
