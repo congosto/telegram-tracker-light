@@ -119,37 +119,38 @@ else:
 				print(f'--> downloading {channel} ({i} of {num_channels}) ')
 				os.system(f'python main.py --telegram-channel {channel}')
 				# Read msgs CSV file 
-				print(f'----> Reading CSV file...{data_path}/{channel}/collected_chats.csv')
-				df = pd.read_csv(f'{data_path}/{channel}/collected_chats.csv')
-				print(f'--------> append {channel} data to {dataset_name} ')
-				# Append to dataset CSV file 
-				if not os.path.exists(f'{dataset_path}/{dataset_name}/collected_chats.csv'):
-					df.to_csv(f'{dataset_path}/{dataset_name}/collected_chats.csv',
-						mode='w',
-						encoding='utf-8',
-						index=False)
-				else:
+				if os.path.exists(f'{data_path}/{channel}/collected_chats.csv'):
+					print(f'----> Reading CSV file...{data_path}/{channel}/collected_chats.csv')
+					df = pd.read_csv(f'{data_path}/{channel}/collected_chats.csv')
+					print(f'--------> append {channel} data to {dataset_name} ')
+					# Append to dataset CSV file 
+					if not os.path.exists(f'{dataset_path}/{dataset_name}/collected_chats.csv'):
+						df.to_csv(f'{dataset_path}/{dataset_name}/collected_chats.csv',
+							mode='w',
+							encoding='utf-8',
+							index=False)
+					else:
 						df.to_csv(f'{dataset_path}/{dataset_name}/collected_chats.csv',
 							encoding='utf-8',
 							mode='a',
 							header = False,
 							index=False)
-			# Read msgs CSV file
-				print(f'----> Reading CSV file...{data_path}/{channel}/msgs_dataset.csv')
-				df = pd.read_csv(f'{data_path}/{channel}/msgs_dataset.csv') 
-				print(f'--------> append {channel} data to {dataset_name} ')
-				# Append to dataset CSV file  
-				if not os.path.exists(f'{dataset_path}/{dataset_name}/msgs_dataset.csv'):
-					df.to_csv(f'{dataset_path}/{dataset_name}/msgs_dataset.csv',
-						mode='w',
-						encoding='utf-8',
-						index=False)
-				else:
+					# Read msgs CSV file
+					print(f'----> Reading CSV file...{data_path}/{channel}/msgs_dataset.csv')
+					df = pd.read_csv(f'{data_path}/{channel}/msgs_dataset.csv') 
+					print(f'--------> append {channel} data to {dataset_name} ')
+					# Append to dataset CSV file  
+					if not os.path.exists(f'{dataset_path}/{dataset_name}/msgs_dataset.csv'):
 						df.to_csv(f'{dataset_path}/{dataset_name}/msgs_dataset.csv',
-							mode='a',
+							mode='w',
 							encoding='utf-8',
-							header = False,
 							index=False)
+					else:
+						df.to_csv(f'{dataset_path}/{dataset_name}/msgs_dataset.csv',
+						mode='a',
+						encoding='utf-8',
+						header = False,
+						index=False)
 			f_log.write(f'{channel},downloaded,{datetime.now()}\n')
 			f_log.flush()
 			i += 1
