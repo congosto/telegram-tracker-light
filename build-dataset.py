@@ -109,9 +109,9 @@ else:
 		outputfile.close()
 	num_channels = len (channels)
 	i = 1
-	try:
-		(f_log, list_downloaded) = log_management(f'{dataset_path}/{dataset_name}',f'{dataset_name}_log.csv')
-		for channel in channels:
+	(f_log, list_downloaded) = log_management(f'{dataset_path}/{dataset_name}',f'{dataset_name}_log.csv')
+	for channel in channels:
+		try:
 			channel = channel.strip('\n') # remove line break
 			if channel in list_downloaded.values:
 					print(f'--------> already downloaded {channel} ({i} of {num_channels})')
@@ -154,30 +154,31 @@ else:
 			f_log.write(f'{channel},downloaded,{datetime.now()}\n')
 			f_log.flush()
 			i += 1
-		f_log.close()
-		'''
+		except KeyboardInterrupt:
+			print ('\nGoodbye!')
+			sys.exit(0)
+		except:
+			print (f'\n¡¡¡ An exception has happened, ruled out {channel}!!!')
+			pass
+	f_log.close()
+	'''
 
-		Remove duplicate channel metadata
+	Remove duplicate channel metadata
 
-		'''
-		print(f'--------> remove duplicates of {dataset_path}/{dataset_name}/collected_chats.csv')
-		df = pd.read_csv(
+	'''
+	print(f'--------> remove duplicates of {dataset_path}/{dataset_name}/collected_chats.csv')
+	df = pd.read_csv(
+	f'{dataset_path}/{dataset_name}/collected_chats.csv',
+	encoding='utf-8'
+	)
+	df.drop_duplicates(subset=['id'], keep='last', inplace=True) 
+	df.to_csv(
 		f'{dataset_path}/{dataset_name}/collected_chats.csv',
+		mode='w',
+		index=False,
 		encoding='utf-8'
-		)
-		df.drop_duplicates(subset=['id'], keep='last', inplace=True) 
-		df.to_csv(
-			f'{dataset_path}/{dataset_name}/collected_chats.csv',
-			mode='w',
-			index=False,
-			encoding='utf-8'
-		)
-	except KeyboardInterrupt:
-		print ('\nGoodbye!')
-		sys.exit(0)
-	except:
-		print ('\nAn exception has happened')
-		pass
+	)
+
 
 '''
 End script
