@@ -40,13 +40,15 @@ manage context
 def log_management (path_dataset,log_file):
 	log_path = f'{path_dataset}/context/{log_file}'
 	if os.path.exists(log_path):
+		print (f'--> context from  {log_path}')
 		df = pd.read_csv(
-		  log_path,
-		  encoding='utf-8'
+				log_path,
+				encoding='utf-8'
 		)
 		list_downloaded = df[df['type'] == 'downloaded']['channel']
-		f_log = open(log_file, 'a')
+		f_log = open(log_path, 'a')
 	else:
+		print (f'--> new context  {log_path}')
 		os.makedirs(f'{path_dataset}/context/', exist_ok=True)
 		f_log = open(log_path, 'a')
 		f_log.write('channel,type,date\n')
@@ -69,7 +71,7 @@ def create_dirs(root, subfolders=None):
 	# create dir context for logs
 	if not os.path.exists(f'{root}/context'):
 		os.makedirs(f'{root}/context', exist_ok=True)
-	print(f'created {root}/context')
+		print(f'created {root}/context')
 	return
 '''
 Access the context of the last message download to obtain only
