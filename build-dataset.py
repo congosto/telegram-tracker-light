@@ -151,14 +151,17 @@ else:
 						encoding='utf-8',
 						header = False,
 						index=False)
-			f_log.write(f'{channel},downloaded,{datetime.now()}\n')
-			f_log.flush()
+					f_log.write(f'{channel},downloaded,{datetime.now()}\n')
+					f_log.flush()
+				else:
+					print (f'\n¡¡¡ An exception has happened, ruled out {channel}!!!')
 			i += 1
 		except KeyboardInterrupt:
 			print ('\nGoodbye!')
 			sys.exit(0)
 		except:
 			print (f'\n¡¡¡ An exception has happened, ruled out {channel}!!!')
+			i += 1
 			pass
 	f_log.close()
 	'''
