@@ -20,12 +20,13 @@ try:
 		print ('2. Get a snowball from a channel')
 		print ('3. Get a channel list')
 		print ('4. Get charts')
-		print ('5. Exit')
+		print ('5. get graph (gexf format)')
+		print ('6. Exit')
 		print (' ')
 		while True:
 			try:
 				option = int(input('--> Enter option: '))
-				if option in range (1,6):
+				if option in range (1,7):
 					break
 				else:
 					print('type a number from 1 to 5')
@@ -40,7 +41,7 @@ try:
 			print(f'Output on {channel_path}')
 			print(f'Download channel {channel}')
 			os.system(f'python main.py' +
-				f' --telegram-channel {channel}' )
+				f' --telegram-channel {channel}')
 		'''
 		Get a snowball from a user
 		'''
@@ -81,9 +82,19 @@ try:
 			else:
 				print(f'{dataset_name} does not exist')
 			'''
+			Get graph
+			'''
+		if option == 5:
+			dataset_name = input ('Enter dataset or channel name: ')
+			if os.path.exists(f'./dataset/{dataset_name}/'):
+				print(f'--------> Get graph from dataset {dataset_name}')
+				os.system (f'python net.py --dataset {dataset_name}')
+			else:
+				print(f'{dataset_name} does not exist')
+			'''
 			Exit
 			'''
-		elif option == 5:
+		elif option == 6:
 			exit = 'y'
 			break
 except KeyboardInterrupt:
