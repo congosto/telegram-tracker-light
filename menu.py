@@ -21,7 +21,7 @@ try:
 		print ('3. Get a channel list')
 		print ('4. Get charts')
 		print ('5. get graph (gexf format)')
-		print ('6. get summary chammels (xlsx format)')
+		print ('6. get summary channels (xlsx format)')
 		print ('7. Exit')
 		print (' ')
 		while True:
