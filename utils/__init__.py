@@ -333,14 +333,17 @@ def write_collected_chats(
 
 
 	df = pd.DataFrame(metadata)
-	csv_path = f'{output_folder}/collected_chats.csv'
-	df.to_csv(
-		csv_path,
-		encoding='utf-8',
-		mode='a',
-		index=False,
-		header=not os.path.isfile(csv_path)
-	)
+	#print (f'lenght {len(df)} cabecera {df.columns.tolist()}')
+	if len(df) >0:
+		df = df[chats_dataset_columns()]
+		csv_path = f'{output_folder}/collected_chats.csv'
+		df.to_csv(
+			csv_path,
+			encoding='utf-8',
+			mode='a',
+			index=False,
+			header=not os.path.isfile(csv_path)
+		)
 
 	return counter
 
@@ -507,14 +510,14 @@ def get_url_attrs(msg, res):
 
 # Chats dataset -> columns
 def chats_dataset_columns():
-	'''
-	'''
+
 	return [
 		'_',
 		'id',
-		'username',
 		'title',
+		'photo',
 		'date',
+		'creator',
 		'left',
 		'broadcast',
 		'verified',
@@ -530,6 +533,16 @@ def chats_dataset_columns():
 		'call_not_empty',
 		'fake',
 		'gigagroup',
+		'noforwards',
+		'join_to_send',
+		'join_request',
+		'forum',
+		'stories_hidden',
+		'stories_hidden_min',
+		'stories_unavailable',
+		'signature_profiles',
+		'access_hash',
+		'username',
 		'restriction_reason',
 		'admin_rights',
 		'banned_rights',
@@ -537,15 +550,11 @@ def chats_dataset_columns():
 		'participants_count',
 		'usernames',
 		'stories_max_id',
-		'color,profile_color',
+		'color',
+		'profile_color',
 		'emoji_status',
 		'level',
-		'username_y,',
-		'counter',
-		'from_messages',
-		'channel_request',
-		'channel_req_targeted_by',
-		'source'
+		'subscription_until_date'
 	]
 # Chats dataset ->types
 def chats_dataset_dtypes():
@@ -554,7 +563,6 @@ def chats_dataset_dtypes():
 	dtypes = {
 		'_': 'object',
 		'id': 'object',
-		'username': 'object',
 		'title': 'object',
 		'photo': 'object',
 		'date': 'object',
@@ -575,14 +583,15 @@ def chats_dataset_dtypes():
 		'fake': 'object',
 		'gigagroup': 'object',
 		'noforwards': 'object',
-		'join_to_send':'object',
-		'join_request':'object',
-		'forum':'object',
-		'stories_hidden':'object',
-		'stories_hidden_min':'object',
-		'stories_unavailable':'object',
-		'access_hash':'object',
-		'username':'object',
+		'join_to_send': 'object',
+		'join_request': 'object',
+		'forum': 'object',
+		'stories_hidden': 'object',
+		'stories_hidden_min': 'object',
+		'stories_unavailable': 'object',
+		'signature_profiles': 'object',
+		'access_hash': 'object',
+		'username': 'object',
 		'restriction_reason': 'object',
 		'admin_rights': 'object',
 		'banned_rights': 'object',
@@ -593,7 +602,8 @@ def chats_dataset_dtypes():
 		'color': 'object',
 		'profile_color': 'object',
 		'emoji_status': 'object',
-		'level': 'object'
+		'level': 'object',
+		'subscription_until_date': 'object'
 	}
 	return (dtypes)
 
