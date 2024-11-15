@@ -111,7 +111,7 @@ You can access it in command mode, but with the **menu.py** script you can downl
 -   **Via git clone**
 
 ```         
-https://github.com/congosto/telegram-tracker-t-hoarder_tg.git
+https://github.com/congosto/telegram-tracker-light.git
 ```
 
 This will create a directory called `telegram-tracker` which contains the Python scripts. Cloning allows you to easily upgrade and switch between available releases.
