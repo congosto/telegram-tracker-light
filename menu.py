@@ -21,17 +21,18 @@ try:
 		print ('3. Get a channel list')
 		print ('4. Get charts')
 		print ('5. get graph (gexf format)')
-		print ('6. Exit')
+		print ('6. get summary chammels (xlsx format)')
+		print ('7. Exit')
 		print (' ')
 		while True:
 			try:
 				option = int(input('--> Enter option: '))
-				if option in range (1,7):
+				if option in range (1,8):
 					break
 				else:
-					print('type a number from 1 to 5')
+					print('type a number from 1 to 7')
 			except:
-				print('type a number from 1 to 5')
+				print('type a number from 1 to 7')
 			'''
 			Get a channel
 			'''
@@ -91,10 +92,19 @@ try:
 				os.system (f'python net.py --dataset {dataset_name}')
 			else:
 				print(f'{dataset_name} does not exist')
+		'''
+		Get summary channels
+				'''
+		if option == 6:
+			if os.path.exists('./data'):
+				print('--------> Get summary channel')
+				os.system ('python ./summary_channels.py')
+			else:
+				print('channels dir does not exist')
 			'''
 			Exit
 			'''
-		elif option == 6:
+		elif option == 7:
 			exit = 'y'
 			break
 except KeyboardInterrupt:
