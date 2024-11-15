@@ -19,7 +19,7 @@ from utils import (
 	get_config_attrs, create_dirs, 
 	write_collected_chats,get_last_download_context,
 	put_last_download_context,store_channels_download,store_channels_related,
-	msgs_dataset_columns,write_collected_msgs
+	msgs_dataset_columns,chats_dataset_columns, chats_dataset_dtypes, write_collected_msgs
 )
 
 
@@ -76,11 +76,7 @@ config_attrs = get_config_attrs()
 
 args = {**args, **config_attrs}
 
-# log results
-text = f'''
-Init program at {time.ctime()}
-
-'''
+text = f'Init program at {time.ctime()}'
 print (text)
 
 
@@ -371,13 +367,23 @@ counter_df.to_csv(
 )
 
 # merge dataframe
-df = pd.read_csv(
-f'{output_folder}/collected_chats.csv',
-encoding='utf-8'
-)
+with open(f'{output_folder}/collected_chats.csv', 'r', encoding='utf-8', errors='replace') as file: 
+	df = pd.read_csv(
+				file,
+				sep=',',
+				low_memory=False,
+				usecols=chats_dataset_columns(),
+				on_bad_lines='skip'
+		)
+#df = pd.read_csv(
+#f'{output_folder}/collected_chats.csv',
+#on_bad_lines='skip',
+#3encoding='utf-8'
+#)
 
 #remove possible duplicates
 df.drop_duplicates(subset=['id'], keep='last', inplace=True) # Change by Congosto
+
 df.to_csv(
 	f'{output_folder}/collected_chats.csv',
 	mode='w', # Change by Congosto  avoid duplicates
