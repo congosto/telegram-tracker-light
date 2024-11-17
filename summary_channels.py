@@ -13,18 +13,19 @@ from utils import (
 	chats_dataset_dtypes
 	)
 
-data_path = './data'
+output_path = './summary'
 channel_path = './data'
 channel_info_file = 'collected_chats.csv'
 channel_msgs = 'msgs_dataset.csv'
-output_file = os.path.join(data_path,'summary_channels.xlsx')
-output_file_wrongs = os.path.join(data_path,'wrong_channels.csv')
+output_file = os.path.join(output_path,'summary_channels.xlsx')
+output_file_wrongs = os.path.join(output_path,'wrong_channels.csv')
+if not os.path.exists(output_path):
+	os.makedirs(f'{output_path}', exist_ok=True)
 f_wrong = open(output_file_wrongs, 'w')
-
 first_channel = True
-channels = [nombre for nombre in os.listdir(data_path) if os.path.isdir(os.path.join(data_path,nombre))]
+channels = [nombre for nombre in os.listdir(channel_path) if os.path.isdir(os.path.join(channel_path,nombre))]
 for channel in tqdm(channels, desc="find channels", unit="channel"):
-	channel_info = os.path.join(data_path,channel, channel_info_file)
+	channel_info = os.path.join(channel_path,channel, channel_info_file)
 	#get channel data
 	try:
 	# Read profiles
@@ -41,12 +42,12 @@ for channel in tqdm(channels, desc="find channels", unit="channel"):
 						 'verified', 'megagroup', 'gigagroup', 'restricted', 'fake', 'noforwards', 'join_to_send',
 						  'join_request']]
 		# Read log
-		log_file = os.path.join(data_path, channel, 'context', f'{channel}_log.csv')
+		log_file = os.path.join(channel_path, channel, 'context', f'{channel}_log.csv')
 		log = pd.read_csv(log_file)
 		# Get last row
 		last_row = log.iloc[-1]
 		# Read msgs
-		msgs_file = os.path.join(data_path, channel, channel_msgs)
+		msgs_file = os.path.join(channel_path, channel, channel_msgs)
 		msgs = pd.read_csv(msgs_file, low_memory=False)
 		if { 'date', 'number_replies', 'number_forwards'}.issubset(msgs.columns):
 			num_msgs = len(msgs)

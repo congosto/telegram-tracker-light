@@ -21,7 +21,7 @@ try:
 		print ('3. Get a channel list')
 		print ('4. Get charts')
 		print ('5. get graph (gexf format)')
-		print ('6. get summary channels (xlsx format)')
+		print ('6. get summary (xlsx format)')
 		print ('7. Exit')
 		print (' ')
 		while True:
@@ -41,7 +41,7 @@ try:
 			channel_path = f'{data_path}/{channel}'
 			print(f'Output on {channel_path}')
 			print(f'Download channel {channel}')
-			os.system(f'python main.py' +
+			os.system('python main.py' +
 				f' --telegram-channel {channel}')
 		'''
 		Get a snowball from a user
@@ -53,7 +53,7 @@ try:
 				print(f'{channel_root} must have been downloaded before')
 			else:
 				os.system('' +
-					f'python build-dataset.py' +
+					'python build-dataset.py' +
 					f' --dataset-name {channel_root}_n2' +
 					f' --channel-list {channel_list}') 
 			'''
@@ -66,7 +66,7 @@ try:
 			else:
 				channel_list = f'{dataset_path}/{dataset_name}/channel_list.csv'
 			os.system('' +
-				f'python build-dataset.py' +
+				'python build-dataset.py' +
 				f' --dataset-name {dataset_name}' +
 				f' --channel-list {channel_list}')
 			'''
@@ -96,11 +96,20 @@ try:
 		Get summary channels
 				'''
 		if option == 6:
-			if os.path.exists('./data'):
-				print('--------> Get summary channel')
-				os.system ('python ./summary_channels.py')
-			else:
-				print('channels dir does not exist')
+			flag_dataset = input ('Dataset summary? (y | n) : ')
+			flag_channel = input ('Channels summary? (y | n) : ')
+			if flag_channel.lower() == 'y':
+				if os.path.exists('./data'):
+					print('--------> Get channels summary')
+					os.system ('python ./summary_channels.py')
+				else:
+					print('data dir does not exist')
+			if flag_dataset.lower() == 'y':
+				if os.path.exists('./dataset'):
+					print('--------> Get datasets summary')
+					os.system ('python ./summary_datasets.py')
+				else:
+					print('datasets dir does not exist')
 			'''
 			Exit
 			'''
