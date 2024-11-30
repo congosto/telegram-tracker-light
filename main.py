@@ -10,9 +10,10 @@ import json
 import time
 import sys
 import os
+import logging 
 # import submodules
+from datetime import datetime
 from tqdm import tqdm
-# import submodules
 # import Telegram API submodules
 from api import *
 from utils import (
@@ -127,13 +128,12 @@ if args['max_msgs']:
 else:
 	limited_msgs = False
 	max_msgs = 0  # not limitedf
-output= args['output']
-
+output = args['output']
 output_folder= f'{output}/{channel}'
-
 # create dirs
 create_dirs(output_folder)
-
+exceptions_path = os.path.join(output_folder,'_exceptions-channels.txt')
+logging.basicConfig(filename= exceptions_path, level=logging.ERROR) 
 
 '''
 
@@ -173,11 +173,28 @@ print ('> ...')
 print ('')
 
 # Channel's attributes
-entity_attrs = loop.run_until_complete(
-	get_entity_attrs(client, channel)
-)
 
-
+while True:
+	try:
+		entity_attrs = loop.run_until_complete(
+			get_entity_attrs(client, channel)
+		)
+		print('Get entity attribs')
+		break
+	except errors.FloodWaitError as e:
+		print('paso-0')
+		# e.seconds contiene el número de segundos que debes 
+		print(f'ratelimit at {datetime.now()}')
+		hours, remainder = divmod(e.seconds, 3600)
+		minutes, seconds = divmod(remainder, 60)
+		print(f'Flood wait for {e.seconds} seconds ({hours} hours, {minutes} minutes y {seconds} seconds)')
+		time.sleep (e.seconds)
+	except Exception as e:
+		print('paso-1')
+		print (f'¡¡¡ An exception has happened, ruled out {channel} {str(e)}!!!\n')
+		print(str(e), file=sys.stderr)
+		logging.error (f'{datetime.now()},Exception ,{channel}, {str(e)}') 
+		sys.exit(0)
 '''
 
 collected chats
@@ -250,12 +267,10 @@ if entity_attrs:
 			offset_id = min([i['id'] for i in data['messages']])
 			last_msg = data['messages'][0]['id']
 			num_msgs = len(posts.messages)
-			pbar = tqdm(total=last_msg - start_msg)
-			pbar.set_description(f'Downloading posts')
+			pbar = tqdm(total=last_msg - start_msg, desc = 'Downloading posts', file=sys.stdout)
 			pbar_flag = True
 		# Get offset ID | Get messages
 		while len(posts.messages) > 0:
-
 			if start_msg > 0: # changed by congosto
 				posts = loop.run_until_complete(
 					get_posts(
@@ -316,16 +331,13 @@ if entity_attrs:
 		if pbar_flag:
 			pbar.close()
 else:
-	'''
-	Channel not found
-	'''
-	print(f'{channel} does not exist')
-	exceptions_path = f'{output_folder}/_exceptions-channels-not-found.txt'
-	w = open(exceptions_path, encoding='utf-8', mode='a')
-	w.write(f'{channel}\n')
-	w.close()
-	sys.exit()
-
+		'''
+		Channel not found
+		'''
+		print(f'{channel} does not exist\n')
+		print(f'{channel} does not exist', file=sys.stderr)
+		logging.error (f'{datetime.now()},{channel}, does not exist')
+		sys.exit(0)
 '''
 
 Clean generated chats text file
@@ -375,11 +387,6 @@ with open(f'{output_folder}/collected_chats.csv', 'r', encoding='utf-8', errors=
 				usecols=chats_dataset_columns(),
 				on_bad_lines='skip'
 		)
-#df = pd.read_csv(
-#f'{output_folder}/collected_chats.csv',
-#on_bad_lines='skip',
-#3encoding='utf-8'
-#)
 
 #remove possible duplicates
 df.drop_duplicates(subset=['id'], keep='last', inplace=True) # Change by Congosto
@@ -464,3 +471,4 @@ store_channels_related(f'./{output_folder}/context/related_channel_log.csv',user
 text = f'End program at {time.ctime()}'
 
 print (text)
+sys.exit(0)
