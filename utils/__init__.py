@@ -72,8 +72,11 @@ def create_dirs(root, subfolders=None):
 	if not os.path.exists(f'{root}/context'):
 		os.makedirs(f'{root}/context', exist_ok=True)
 		print(f'created {root}/context')
+	if not os.path.exists(f'{root}/_exceptions-channels.txt'):
+		with open(f'{root}/_exceptions-channels.txt', 'w') as file: file.write('') 
+		print(f'created {root}/_exceptions-channels.txt')
 	return
-'''
+'''store_channels_download
 Access the context of the last message download to obtain only
 the new ones, if any.
 '''
@@ -327,7 +330,6 @@ def write_collected_chats(
 						w = open(exceptions_path, encoding='utf-8', mode='a')
 						w.write(f'ID - {id_}\n')
 						w.close()
-
 		except KeyError:
 			pass
 
@@ -698,8 +700,7 @@ def write_collected_msgs (messages, username, chats, msg_tmp):
 	}
 	chats = pd.DataFrame(chats)
 	for idx, item in enumerate(messages):
-		#try:
-		if True:
+		try:
 			'''
 			Iterate posts
 			'''
@@ -774,8 +775,7 @@ def write_collected_msgs (messages, username, chats, msg_tmp):
 				response = get_url_attrs(msg, response)
 
 				df_msgs.loc[-1] = response
-		else:
-		#except:
+		except:
 			print('an exception happened')
 
 	df_msgs.to_csv(
