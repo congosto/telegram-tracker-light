@@ -1,3 +1,6 @@
+'''
+This script is based on one made by Marcelino Madrigal
+'''
 import re
 import os
 import sys
@@ -72,6 +75,7 @@ def create_timeline_lineplot(ddf, attribute_a, attribute_b, filter_b, title, tit
 	if max_value == 0:
 		print(f'There are no {attribute_b}')
 		return
+	print(df_a.nlargest(10, 'is_forward'))
 	# We separate the figure into two overlapping objects
 	fig, ax1 = plt.subplots()
 	# create line chart
@@ -79,7 +83,7 @@ def create_timeline_lineplot(ddf, attribute_a, attribute_b, filter_b, title, tit
 	ax1.grid (color = COLOR_GRID) # Add grid
 	ax1 = sns.lineplot(data=df_a, x='date', y=attribute_a, color=BLUE, linewidth=1.5)
 	ax2 = plt.twinx()
-	ax2 = sns.lineplot(data=df_b, x='date', y=attribute_b, color=RED, linewidth=1.5)
+	ax2 = sns.scatterplot(data=df_b, x='date', y=attribute_b, color=RED, s=10)
 	ax1.grid (False) # remove grid
 	ax1.yaxis.set_major_formatter(ticker.FuncFormatter(si_formatter))
 	ax2.yaxis.set_major_formatter(ticker.FuncFormatter(si_formatter))
