@@ -22,12 +22,13 @@ try:
 		print ('4. Get charts')
 		print ('5. get graph (gexf format)')
 		print ('6. get summary (xlsx format)')
-		print ('7. Exit')
+		print ('7. update channels')
+		print ('8. Exit')
 		print (' ')
 		while True:
 			try:
 				option = int(input('--> Enter option: '))
-				if option in range (1,8):
+				if option in range (1,9):
 					break
 				else:
 					print('type a number from 1 to 7')
@@ -92,9 +93,9 @@ try:
 				os.system (f'python net.py --dataset {dataset_name}')
 			else:
 				print(f'{dataset_name} does not exist')
-		'''
-		Get summary channels
-				'''
+			'''
+			Get summary channels
+			'''
 		if option == 6:
 			flag_dataset = input ('Dataset summary? (y | n) : ')
 			flag_channel = input ('Channels summary? (y | n) : ')
@@ -111,9 +112,15 @@ try:
 				else:
 					print('datasets dir does not exist')
 			'''
+			update channels
+			'''
+		if option == 7:
+			print('--------> update channels')
+			os.system ('python ./update_channels.py')
+			'''
 			Exit
 			'''
-		elif option == 7:
+		elif option == 8:
 			exit = 'y'
 			break
 except KeyboardInterrupt:
