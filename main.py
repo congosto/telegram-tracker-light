@@ -131,7 +131,7 @@ else:
 output = args['output']
 output_folder= f'{output}/{channel}'
 # create dirs
-create_dirs(output_folder)
+channel_id = create_dirs(output_folder) # If channel exists, returns its ID
 exceptions_path = os.path.join(output_folder,'_exceptions-channels.txt')
 logging.basicConfig(filename= exceptions_path, level=logging.ERROR) 
 
@@ -172,17 +172,26 @@ print (f'> Collecting data from Telegram Channel -> {channel}')
 print ('> ...')
 print ('')
 
-# Channel's attributes
-
+channel_request = None
 while True:
 	try:
-		entity_attrs = loop.run_until_complete(
-			get_entity_attrs(client, channel)
+		if  channel_id == None:
+			entity_attrs = loop.run_until_complete(
+				get_entity_attrs	(client, channel)
+				)
+			#Get Channel ID | convert output to dict
+			if  entity_attrs:
+				channel_id = entity_attrs.id
+			else:
+				logging.error (f'{datetime.now()},Error,{channel}, ID not found')
+				break
+		# Collect Source -> GetFullChannelRequest
+		channel_request = loop.run_until_complete(
+			full_channel_req(client, channel_id)
 		)
 		print('Get entity attribs')
 		break
 	except errors.FloodWaitError as e:
-		print('paso-0')
 		# e.seconds contiene el número de segundos que debes 
 		print(f'ratelimit at {datetime.now()}')
 		hours, remainder = divmod(e.seconds, 3600)
@@ -190,11 +199,13 @@ while True:
 		print(f'Flood wait for {e.seconds} seconds ({hours} hours, {minutes} minutes y {seconds} seconds)')
 		time.sleep (e.seconds)
 	except Exception as e:
-		print('paso-1')
 		print (f'¡¡¡ An exception has happened, ruled out {channel} {str(e)}!!!\n')
 		print(str(e), file=sys.stderr)
-		logging.error (f'{datetime.now()},Exception ,{channel}, {str(e)}') 
-		sys.exit(0)
+		logging.error (f'{datetime.now()},Exception ,{channel}, {str(e)}')
+		break
+		
+
+
 '''
 
 collected chats
@@ -202,24 +213,13 @@ collected chats
 '''
 
 
-if entity_attrs:
-
-	# Get Channel ID | convert output to dict
-	channel_id = entity_attrs.id
-	entity_attrs_dict = entity_attrs.to_dict()
-
-	# Collect Source -> GetFullChannelRequest
-	channel_request = loop.run_until_complete(
-		full_channel_req(client, channel_id)
-	)
-
+if channel_request != None:
 	
 	# save full channel request
 	full_channel_data = channel_request.to_dict()
 	# collect chats
 	chats_path = f'{output_folder}/chats.txt'
 	chats_file = open(chats_path, mode='a', encoding='utf-8')
-
 	# channel chats
 	counter = write_collected_chats(
 	full_channel_data['chats'],
@@ -332,11 +332,9 @@ if entity_attrs:
 			pbar.close()
 else:
 		'''
-		Channel not found
+		Channel not found or is private or you lack permission to access it
 		'''
-		print(f'{channel} does not exist\n')
-		print(f'{channel} does not exist', file=sys.stderr)
-		logging.error (f'{datetime.now()},{channel}, does not exist')
+		logging.error (f'{datetime.now()},Error, {channel}, channel not downloaded')
 		sys.exit(0)
 '''
 
