@@ -40,15 +40,13 @@ manage context
 def log_management (path_dataset,log_file):
 	log_path = f'{path_dataset}/context/{log_file}'
 	if os.path.exists(log_path):
-		print (f'--> context from  {log_path}')
 		df = pd.read_csv(
-				log_path,
-				encoding='utf-8'
+		  log_path,
+		  encoding='utf-8'
 		)
 		list_downloaded = df[df['type'] == 'downloaded']['channel']
-		f_log = open(log_path, 'a')
+		f_log = open(log_file, 'a')
 	else:
-		print (f'--> new context  {log_path}')
 		os.makedirs(f'{path_dataset}/context/', exist_ok=True)
 		f_log = open(log_path, 'a')
 		f_log.write('channel,type,date\n')
@@ -71,12 +69,9 @@ def create_dirs(root, subfolders=None):
 	# create dir context for logs
 	if not os.path.exists(f'{root}/context'):
 		os.makedirs(f'{root}/context', exist_ok=True)
-		print(f'created {root}/context')
-	if not os.path.exists(f'{root}/_exceptions-channels.txt'):
-		with open(f'{root}/_exceptions-channels.txt', 'w') as file: file.write('') 
-		print(f'created {root}/_exceptions-channels.txt')
+	print(f'created {root}/context')
 	return
-'''store_channels_download
+'''
 Access the context of the last message download to obtain only
 the new ones, if any.
 '''
@@ -330,22 +325,20 @@ def write_collected_chats(
 						w = open(exceptions_path, encoding='utf-8', mode='a')
 						w.write(f'ID - {id_}\n')
 						w.close()
+
 		except KeyError:
 			pass
 
 
 	df = pd.DataFrame(metadata)
-	#print (f'lenght {len(df)} cabecera {df.columns.tolist()}')
-	if len(df) >0:
-		df = df[chats_dataset_columns()]
-		csv_path = f'{output_folder}/collected_chats.csv'
-		df.to_csv(
-			csv_path,
-			encoding='utf-8',
-			mode='a',
-			index=False,
-			header=not os.path.isfile(csv_path)
-		)
+	csv_path = f'{output_folder}/collected_chats.csv'
+	df.to_csv(
+		csv_path,
+		encoding='utf-8',
+		mode='a',
+		index=False,
+		header=not os.path.isfile(csv_path)
+	)
 
 	return counter
 
@@ -499,10 +492,9 @@ def get_url_attrs(msg, res):
 	if url != None:
 		url = url.group()
 		domain = re.search(r'(?<=://)[^/]+', url)
-		if domain != None:
-			domain = re.sub ('^www\.|^WWW\.', "", domain.group())
-			domain = re.sub ('m.youtu.be|youtu.be|m.youtube.com', "youtube.com", domain)
-			domain = re.sub ('t.co', "twitter.com", domain)
+		domain = re.sub ('^www\.|^WWW\.', "", domain.group())
+		domain = re.sub ('m.youtu.be|youtu.be|m.youtube.com', "youtube.com", domain)
+		domain = re.sub ('t.co', "twitter.com", domain)
 		has_url = 1
 	res['has_url'] = has_url
 	res['url'] = url
@@ -512,14 +504,14 @@ def get_url_attrs(msg, res):
 
 # Chats dataset -> columns
 def chats_dataset_columns():
-
+	'''
+	'''
 	return [
 		'_',
 		'id',
+		'username',
 		'title',
-		'photo',
 		'date',
-		'creator',
 		'left',
 		'broadcast',
 		'verified',
@@ -535,79 +527,19 @@ def chats_dataset_columns():
 		'call_not_empty',
 		'fake',
 		'gigagroup',
-		'noforwards',
-		'join_to_send',
-		'join_request',
-		'forum',
-		'stories_hidden',
-		'stories_hidden_min',
-		'stories_unavailable',
-		'signature_profiles',
-		'access_hash',
-		'username',
 		'restriction_reason',
 		'admin_rights',
 		'banned_rights',
 		'default_banned_rights',
 		'participants_count',
-		'usernames',
-		'stories_max_id',
-		'color',
-		'profile_color',
-		'emoji_status',
-		'level',
-		'subscription_until_date'
+		'collected_actions',
+		'collected_posts',
+		'replies',
+		'other_actions',
+		'number_views',
+		'forwards',
+		'replies_received'
 	]
-# Chats dataset ->types
-def chats_dataset_dtypes():
-	'''
-	'''
-	dtypes = {
-		'_': 'object',
-		'id': 'object',
-		'title': 'object',
-		'photo': 'object',
-		'date': 'object',
-		'creator': 'object',
-		'left': 'object',
-		'broadcast': 'object',
-		'verified': 'object',
-		'megagroup': 'object',
-		'restricted': 'object',
-		'signatures': 'object',
-		'min': 'object',
-		'scam': 'object',
-		'has_link': 'object',
-		'has_geo': 'object',
-		'slowmode_enabled': 'object',
-		'call_active': 'object',
-		'call_not_empty': 'object',
-		'fake': 'object',
-		'gigagroup': 'object',
-		'noforwards': 'object',
-		'join_to_send': 'object',
-		'join_request': 'object',
-		'forum': 'object',
-		'stories_hidden': 'object',
-		'stories_hidden_min': 'object',
-		'stories_unavailable': 'object',
-		'signature_profiles': 'object',
-		'access_hash': 'object',
-		'username': 'object',
-		'restriction_reason': 'object',
-		'admin_rights': 'object',
-		'banned_rights': 'object',
-		'default_banned_rights': 'object',
-		'participants_count': 'object',
-		'usernames': 'object',
-		'stories_max_id': 'object',
-		'color': 'object',
-		'profile_color': 'object',
-		'emoji_status': 'object',
-		'level': 'object',
-		'subscription_until_date': 'object'
-	}
-	return (dtypes)
 
 # Msgs dataset -> columns
 def msgs_dataset_columns():
@@ -640,39 +572,7 @@ def msgs_dataset_columns():
 		'url',
 		'domain',
 	]
-# Msgs dataset -> columns
-def msgs_dataset_dtypes():
-# Specifying data types manually
-	dtypes = {
-		'signature': 'object',
-		'channel_id': 'object',
-		'channel_name': 'object',
-		'msg_id': 'object',
-		'message': 'object',
-		'date': 'object',
-		'msg_link': 'object',
-		'msg_from_peer': 'object',
-		'msg_from_id': 'object',
-		'views': 'float64',
-		'number_replies': 'float64',
-		'number_forwards': 'float64',
-		'is_forward': 'int32',
-		'forward_msg_from_peer_type': 'object',
-		'forward_msg_from_peer_id': 'object',
-		'forward_msg_from_peer_name': 'object',
-		'forward_msg_date': 'object',
-		'forward_msg_date_string': 'object',
-		'forward_msg_link': 'object',
-		'is_reply': 'int32',
-		'reply_to_msg_id': 'object',
-		'reply_msg_link': 'object',
-		'contains_media': 'object',
-		'media_type': 'object',
-		'has_url': 'object',
-		'url': 'object',
-		'domain': 'object',
-		}
-	return (dtypes)
+
 '''
 
 write collected msgs
@@ -700,7 +600,8 @@ def write_collected_msgs (messages, username, chats, msg_tmp):
 	}
 	chats = pd.DataFrame(chats)
 	for idx, item in enumerate(messages):
-		try:
+		#try:
+		if True:
 			'''
 			Iterate posts
 			'''
@@ -775,7 +676,8 @@ def write_collected_msgs (messages, username, chats, msg_tmp):
 				response = get_url_attrs(msg, response)
 
 				df_msgs.loc[-1] = response
-		except:
+		else:
+		#except:
 			print('an exception happened')
 
 	df_msgs.to_csv(
