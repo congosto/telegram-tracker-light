@@ -6,6 +6,7 @@ import os
 import sys
 import pandas as pd
 import networkx as nx
+import dask.dataframe as dd
 from tqdm import tqdm
 import argparse
 from datetime import datetime
@@ -60,23 +61,39 @@ if not os.path.exists(base_path):
 read channel metadata and messages
 
 '''
+
+# Read CSV file using dask with specified data types
+print("----> Reading CSV file...")
+channel_metadata = pd.read_csv(f'{base_path}/collected_chats.csv', on_bad_lines='skip', engine='python')
+df = dd.read_csv(
+	f'{base_path}/msgs_dataset.csv',
+	dtype=msgs_dataset_dtypes(),
+	usecols=['channel_name','forward_msg_from_peer_name'],
+	on_bad_lines='skip', engine='python')
+print(f'Last {datetime.now()- start_time} ')
+
+'''
 start_time_step = datetime.now()
 print('----> Reading collected_chats.csv and msgs_dataset.csv')
 channel_metadata = pd.read_csv(f'{base_path}/collected_chats.csv')
 df = pd.read_csv(f'{base_path}/msgs_dataset.csv', dtype=msgs_dataset_dtypes(), usecols=['channel_name','forward_msg_from_peer_name'] )
 print(f'Last {datetime.now()- start_time_step} ')
+'''
 
 '''
 create node attributes
 '''
 start_time_step = datetime.now()
 print('----> Create node attributes')
-forward_in = df['forward_msg_from_peer_name'].value_counts().reset_index().\
-		rename(columns={ 'count':'forward_in'})
-forward_out = df[df['forward_msg_from_peer_name'].notna()].groupby('channel_name').size().reset_index().\
-		rename(columns={ 0:'forward_out'})
+forward_in = df[df['forward_msg_from_peer_name'].notnull()]
+forward_in = forward_in.groupby('forward_msg_from_peer_name').size().compute()
+forward_in = forward_in.reset_index()
+forward_in = forward_in.rename(columns={ 0:'forward_in'})
+forward_out = df[df['forward_msg_from_peer_name'].notnull()].\
+	groupby('channel_name').size().reset_index().rename(columns={ 0:'forward_out'})
+forward_out = forward_out.compute()
+#		rename(columns={ 0:'forward_out'})
 print(f'Last {datetime.now()- start_time_step} ')	
-
 nodes = channel_metadata[['username','date','participants_count','verified','megagroup','gigagroup','fake']]
 nodes = nodes.set_index('username')
 forward_in = forward_in.set_index('forward_msg_from_peer_name')
@@ -87,7 +104,7 @@ nodes = nodes.fillna(0)
 nodes['forward_tot'] = nodes['forward_in'] + nodes['forward_out']
 nodes['year'] = pd.DatetimeIndex(nodes['date']).year
 nodes = nodes[(nodes['forward_tot'] > 0)].sort_values("forward_tot", ascending=False)
-print(f'Last {datetime.now()- start_time_step} ')		
+
 '''
 Generate nodes
 '''
@@ -111,12 +128,18 @@ Generate forward arcs
 '''
 start_time_step = datetime.now()
 # Filter rows where 'forward_msg_from_peer_name' has content
-filtered_df = df[df['forward_msg_from_peer_name'].notna()]
-
+#filtered_df = df[df['forward_msg_from_peer_name'].notna()]
+filtered_df = df.dropna(subset=['forward_msg_from_peer_name'])
 # Group by 'channel_name' and 'forward_msg_from_peer_name' and count occurences
-grouped_df = filtered_df.groupby(['channel_name', 'forward_msg_from_peer_name']).value_counts().reset_index().\
-		rename(columns={ 'count':'weight'})
+#grouped_df = filtered_df.groupby(['channel_name', 'forward_msg_from_peer_name']).value_counts().reset_index().\
+#		rename(columns={ 'count':'weight'})
 
+# Agrupar por 'channel_name' y 'forward_msg_from_peer_name', luego contar los elementos
+grouped_df = filtered_df.groupby(['channel_name', 'forward_msg_from_peer_name']).size().\
+	reset_index().rename(columns={ 0:'weight'})
+
+# Computar el resultado y convertirlo en un DataFrame de pandas si es necesario
+grouped_df = grouped_df.compute()
 # Add nodes and edges to the graph with progress bar
 for index, row in tqdm(grouped_df.iterrows(), total=grouped_df.shape[0], desc="processing arcs"):
 	source = row['channel_name']
